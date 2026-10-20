@@ -1,0 +1,88 @@
+tcpdump for Mere Mortals - command card
+=======================================
+Every command verified live against the
+packet lab (examples/lab_server.py on
+127.0.0.1:45080 / udp 45053, TLS fixture
+on 45443) with tcpdump 4.99.4 /
+libpcap 1.10.4. Capture is privileged:
+run as root or with sudo. Always use
+-nn so port numbers and addresses stay
+numbers.
+
+SEEING THE DOORWAYS (ch. 2)
+  tcpdump -D                      list interfaces tcpdump can watch
+  ip -brief address show          the same doorways, with addresses
+
+FIRST CAPTURE (ch. 2)
+  tcpdump -i lo -nn -c 12 tcp port 45080
+                                  12 packets of the lab's web traffic
+  tcpdump -i lo -nn               everything on loopback (Ctrl-C ends)
+
+READING (ch. 3)
+  Flags [S] SYN  [S.] SYN+ACK  [.] ACK
+        [P.] data  [F.] FIN  [R] RST
+  seq a:b = bytes a..b of the stream; ack = next byte expected
+  win = room the sender offers; length = payload bytes
+
+FILTERS (ch. 4)
+  host 127.0.0.1                  to or from an address
+  src host / dst host             directional
+  net 127.0.0.0/8                 a network
+  port 45080 / portrange 45000-45100
+  tcp / udp / icmp                protocol primitives
+  and / or / not  ( )             combine; quote the whole thing
+  tcp[tcpflags] & tcp-syn != 0    connection attempts only
+  "tcp port 45080 and tcp[tcpflags] & tcp-syn != 0"
+                                  attempts to one service
+
+VERBOSITY (ch. 5)
+  -v / -vv        more decoded fields (IP header, checksums)
+  -A              payload as ASCII (reads plain HTTP whole)
+  -X              hex + ASCII, headers included
+  -e              link-layer header (MACs - zeros on loopback)
+
+RECIPES (ch. 6)
+  tcpdump -i host0 -nn -c 4 port 53
+                                  what was asked of DNS, in order
+  tcpdump -i lo -nn -c 2 tcp port 45999
+                                  closed port: [S] out, [R.] back = refused
+  tcpdump -i lo -nn "udp port 45998 or icmp"
+                                  closed UDP: datagram out, ICMP unreachable back
+  (nothing back at all = silence: dropped, filtered, or unroutable)
+
+FILES (ch. 7)
+  tcpdump -i lo -nn -Z root -w specimen.pcap "tcp port 45080 or icmp"
+                                  save raw packets (-Z root is this
+                                  box's spelling; plain -w as root
+                                  works on an ordinary machine)
+  tcpdump -r specimen.pcap -nn    read it back
+  tcpdump -r specimen.pcap -nn icmp
+                                  filters apply again at read time
+  tcpdump -r specimen.pcap -nn -tttt | head -3
+                                  full dates on the timeline
+  tcpdump -r specimen.pcap -nn | awk '{print $3}' | sort | uniq -c | sort -rn
+                                  the talkers, loudest first
+  tcpdump -i lo -nn -Z root -G 3600 -W 24 -w rot-%H%M%S.pcap icmp
+                                  hourly files, a day of them, bounded
+
+LIMITS (ch. 8)
+  -s 100          snaplen: keep only the first 100 bytes per packet
+                  (headers still report true lengths; content trun-
+                  cates. Leave -s alone unless fighting volume.)
+  footer          "packets dropped by kernel" above 0 = your
+                  capture is a sample, not the whole story
+  -B 4096         enlarge the capture buffer when drops bite
+  -p              do NOT ask the interface for other hosts' packets
+                  (promiscuous mode is the default; on switched
+                  networks it mostly changes nothing)
+
+TROUBLESHOOTING (ch. 9)
+  "You don't have permission"     needs root / CAP_NET_RAW
+  "No such device exists"         tcpdump -D for the real names
+  "can't parse filter expression" typo'd primitive, or the shell
+                                  ate your & ( ) [ ] - quote it
+  "Couldn't change ownership"     the -Z root story above
+  empty capture, failing client   the packet may never have been
+                                  sent - silence is a diagnosis too
+
+Full transcripts: ~/workspace/tcpdump-lab/transcripts/

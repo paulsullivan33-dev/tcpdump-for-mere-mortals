@@ -1,0 +1,22 @@
+site_name: tcpdump for Mere Mortals
+site_description: Plain-language tcpdump. Watching the packets your own machines actually send, reading one packet line by line, the filter language, saving captures that outlive the terminal, and knowing exactly what a capture cannot show you, practised on a loopback lab you plant yourself.
+site_url: https://paulsullivan33-dev.github.io/tcpdump-for-mere-mortals/
+
+# Guides live at the repo root (nice for GitHub browsing).
+# The deploy workflow copies them into docs/ before building.
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - What tcpdump Is: what-tcpdump-is.md
+  - Interfaces and First Capture: interfaces-and-first-capture.md
+  - Reading a Packet: reading-a-packet.md
+  - Filters: filters.md
+  - Payload and Verbosity: payload-and-verbosity.md
+  - Everyday Recipes: everyday-recipes.md
+  - Capture Files: capture-files.md
+  - TLS and the Limits of Capture: tls-and-the-limits.md
+  - Troubleshooting: troubleshooting.md
+  - Glossary: glossary.md
+  - Writing Criteria: criteria.md
